@@ -277,7 +277,7 @@ LibraryModule(name               = 'PltMediaConnect',
 #for test in ['FileMediaServer', 'MediaRenderer', 'LightSample', 'Http', 'Time']:
 
 for test in ['MediaRenderer']:
-    gstreamer = env['dir']+'/usr/include/gstreamer-0.10'
+    gstreamer = env['dir']+'/usr/include/gstreamer-1.0'
     glib = findIncludeDir(env['dir']+'/usr/include/','glib-')
     glib1 = findIncludeDir(env['dir']+'/usr/lib/','glib-')
     userlib = env['dir']+'/usr/lib'

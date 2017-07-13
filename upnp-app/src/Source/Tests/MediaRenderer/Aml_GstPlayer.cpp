@@ -23,11 +23,11 @@ void Aml_GstPlayer::Run()
             GstFormat fmt = GST_FORMAT_TIME;
             gint64 current = -1;
             gint64 duration = -1;
-            if ( !gst_element_query_position ( playbin, &fmt, &duration ) ) {
+            if ( !gst_element_query_position ( playbin, fmt, &duration ) ) {
                 g_printerr ( "Could not query current position.\n" );
             }
             if ( !GST_CLOCK_TIME_IS_VALID ( duration ) ) {
-                if ( !gst_element_query_duration ( playbin, &fmt, &duration ) ) {
+                if ( !gst_element_query_duration ( playbin, fmt, &duration ) ) {
                     g_printerr ( "Could not query current duration.\n" );
                 }
             }
