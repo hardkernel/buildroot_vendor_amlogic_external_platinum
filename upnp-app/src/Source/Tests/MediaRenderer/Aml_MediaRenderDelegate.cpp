@@ -117,6 +117,19 @@ Aml_MediaRenderDelegate::~Aml_MediaRenderDelegate()
 // RenderingControl
 NPT_Result Aml_MediaRenderDelegate::OnSetVolume( PLT_ActionReference &action )
 {
+    NPT_String channel;
+    NPT_String value;
+
+    action->GetArgumentValue( "Channel", channel );
+    action->GetArgumentValue( "DesiredVolume" ,value);
+
+    if ( !service ) {
+        service = action->GetActionDesc().GetService();
+    }
+    if ( gst_player ) {
+        gst_player->setVolume( value );
+    }
+
     return NPT_SUCCESS;
 }
 NPT_Result Aml_MediaRenderDelegate::OnSetVolumeDB( PLT_ActionReference &action )

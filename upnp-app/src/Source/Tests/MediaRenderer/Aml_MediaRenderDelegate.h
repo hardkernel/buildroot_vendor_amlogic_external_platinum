@@ -21,6 +21,7 @@ public:
     void release();
     void pause();
     void seek( NPT_String &time );
+    void setVolume( NPT_String &value );
     virtual ~Aml_GstPlayer() {}
 private:
     NPT_String uri;

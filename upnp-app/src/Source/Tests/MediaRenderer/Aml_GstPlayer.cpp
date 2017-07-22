@@ -1,6 +1,16 @@
 #include "Aml_MediaRenderDelegate.h"
 #include "PltUPnP.h"
 #include "unistd.h"
+#include <gst/gst.h>
+#include <gst/gst.h>
+#include <gst/audio/audio.h>
+#include <gst/video/video.h>
+#include <gst/pbutils/pbutils.h>
+#include <gst/tag/tag.h>
+#include <gst/math-compat.h>
+#include <gst/audio/streamvolume.h>
+
+#define VOLUME_STEPS 20
 
 void Aml_GstPlayer::Run()
 {
@@ -61,6 +71,16 @@ void Aml_GstPlayer::stop()
         gst_element_set_state ( playbin, GST_STATE_PAUSED );
     }
 }
+
+void Aml_GstPlayer::setVolume( NPT_String &value )
+{
+    int vol;
+    value.ToInteger(vol);
+    if ( playbin ) {
+        //printf("setVolume:%d\n",vol);
+        gst_set_relative_volume(playbin,vol);
+    }
+}
 void Aml_GstPlayer::pause()
 {
     if ( playbin ) {
@@ -86,7 +106,7 @@ void Aml_GstPlayer::seek( NPT_String &value )
         time = ( ( h * 60 ) + m ) * 60 + s;
         g_printerr ( "seek to %u%d\n", time, arr.GetItemCount() );
         gst_element_seek_simple ( playbin, GST_FORMAT_TIME,
-                                  GstSeekFlags( GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT ), time * GST_SECOND );
+           GstSeekFlags( GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT ), time * GST_SECOND );
     }
 }
 void Aml_GstPlayer::release()
