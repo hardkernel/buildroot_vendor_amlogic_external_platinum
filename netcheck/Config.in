@@ -1,0 +1,6 @@
+config BR2_PACKAGE_NETCHECK
+    bool "upnp-net-check"
+    depends on BR2_PACKAGE_UPNP_APP
+    help
+        dlna net check.
+

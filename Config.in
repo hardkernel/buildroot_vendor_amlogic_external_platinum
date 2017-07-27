@@ -1,3 +1,4 @@
 menu "platinum applications"
 source "../vendor/amlogic/external/platinum/upnp-app/Config.in"
+source "../vendor/amlogic/external/platinum/netcheck/Config.in"
 endmenu
