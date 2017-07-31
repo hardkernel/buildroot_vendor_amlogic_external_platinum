@@ -22,7 +22,7 @@
 #include <netinet/ip_icmp.h>
 #include <netdb.h>
 
-#define PERM S_IRUSR|S_IWUSR
+#define FIFO_NAME "/tmp/netfifo"
 
 #define     MAXWAIT 10
 #define     MAXPACKET 4096
@@ -33,8 +33,6 @@
 #define     MAXHOSTNAMELEN 64
 #endif
 
-int shmid;
-char *p_addr;
 u_char    packet[MAXPACKET];
 int    i, pingflags, options;
 extern    int errno;
@@ -71,11 +69,16 @@ void pinger(void);
 main(argc, argv)
 char *argv[];
 {
-    void *tempaddr1,*tempaddr2;
     pid_t mpid;
     int ret_val=0;
     char buf[100]={0};
-    if ((shmid = shmget(IPC_PRIVATE,5,PERM))== -1) perror("shmget");
+    unlink(FIFO_NAME);
+    if ((mkfifo(FIFO_NAME,0777)<0) && (errno != EEXIST))
+    {
+        printf("cannot create fifo...\n");
+        exit(1);
+    }
+
     mpid=fork();
     if (mpid == 0) {
         int len = sizeof (packet);
@@ -88,6 +91,8 @@ char *argv[];
         struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
         int on = 1;
         struct protoent *proto;
+        int w_num;
+        int fd;
         argc--, av++;
         while (argc > 0 && *av[0] == '-') {
             while (*++av[0]) switch (*av[0]) {
@@ -188,12 +193,8 @@ char *argv[];
         if (!(pingflags & FLOOD))
              catcher(0);
 
-        tempaddr2 = shmat(shmid,0,0);
-        if (tempaddr2 == (void *)-1) {
-            perror("shmat");
-        }
-        p_addr = (char *)tempaddr2;
-        memset(p_addr,0,1024*4);
+        fd=open(FIFO_NAME,O_WRONLY|O_NONBLOCK);
+
         while (1) {
 
         timeout.tv_sec = 0;
@@ -211,38 +212,36 @@ char *argv[];
             continue;
         }
         pr_pack( packet, cc, &from );
-        //sleep(1);
-        //memset(p_addr,0,10);
-        strncpy(p_addr,"netconect\n",10);
+        w_num=write(fd,"netconect\0",10);
         if (npackets && nreceived >= npackets)
             finish(0);
         }
     } else {
         int times=0;
         int num=0;
-        tempaddr1 = shmat(shmid,0,0);
-        if (tempaddr1 == (void *)-1) {
-            perror("shmat");
+        char r_buf[50];
+        int  fd;
+        int  r_num;
+        fd=open(FIFO_NAME,O_RDONLY|O_NONBLOCK);
+        if (fd == -1)
+        {
+            printf("open %s for read error\n");
+            exit(1);
         }
-        p_addr = (char *)tempaddr1;
-        memset(p_addr,0,1024*4);
         while (1) {
-           //sleep(5);
-            strncpy(buf,p_addr,10);
-            if (!strncmp(buf,"netconect",9)) {
-                memset(p_addr,0,9);
-                memset(buf,0,100);
-                times++;
-            }
+
+            memset(r_buf,0,50);
+            r_num=read(fd,r_buf,10);
+            if (r_num == 10) times++;
             sleep(1);
             num++;
             if ((num>5) && (times>3)) {
                 ret_val=1;
-                //kill(mpid,SIGKILL);
             } else ret_val=0;
 
             if (num>5) {
                 kill(mpid,SIGKILL);
+                unlink(FIFO_NAME);
                 break;
             }
         }
