@@ -1,6 +1,6 @@
 #!/bin/sh
 
-address=8.8.8.8
+PROCESS=MediaRendererTest
 
 taskkill()
 {
@@ -31,26 +31,63 @@ kill_task()
 dlna_updown()
 {
     local flag=0
+    local tempgeteway=0
     while true
     do
-    netcheck $address
-    mping_res=$?
-    if [ $mping_res -ne $flag ]; then
-        flag=$mping_res
-        if [ $flag -eq 1 ]; then
-            echo "start dlna..."
-            MediaRendererTest &
+        geteway=`route -n |awk '{print $2}' |awk 'NR==3'`
+        if [ "${geteway}"x != ""x ] && [ "${geteway}"x != "0.0.0.0"x ];then
+            if [ $geteway != $tempgeteway ];then
+                if [ $tempgeteway == "0" ];then
+                    netcheck $geteway
+                    netcheck_res=$?
+                    if [ $netcheck_res -eq 1 ]; then
+                        echo "dlna start[$geteway]:dlna first start..."
+                        $PROCESS &
+                        tempgeteway=$geteway
+                        flag=1
+                    else
+                        echo "dlna start[$geteway]:dlna first start err!"
+                    fi
+                else
+                    kill_task $PROCESS
+                    netcheck $geteway
+                    netcheck_res=$?
+                    if [ $netcheck_res -eq 1 ]; then
+                        echo "dlna restart[$geteway]:network ip change..."
+                        $PROCESS &
+                        tempgeteway=$geteway
+                        flag=1
+                    else
+                        echo "dlna restart[$geteway]:err!"
+                    fi
+                fi
             else
-            echo "stop dlna..."
-            kill_task MediaRendererTest
+                netcheck $geteway
+                netcheck_res=$?
+                if [ $netcheck_res -ne $flag ]; then
+                    flag=$netcheck_res
+                    if [ $flag -eq 1 ]; then
+                        echo "dlna start[$geteway]:network connected..."
+                        $PROCESS &
+                    else
+                        echo "dlna stop[$geteway]:network disconnected..."
+                        kill_task $PROCESS
+                    fi
+                fi
+            fi
+        else
+          if [ $flag -eq 1 ];then
+            echo "dlna stop:network disconnected..."
+            kill_task $PROCESS
+            flag=0
+          fi
         fi
-    fi
     done
 }
 
 kill_all()
 {
-    kill_task MediaRendererTest
+    kill_task $PROCESS
     exit
 }
 

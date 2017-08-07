@@ -235,11 +235,11 @@ char *argv[];
             if (r_num == 10) times++;
             sleep(1);
             num++;
-            if ((num>5) && (times>3)) {
+            if ((num>12) && (times>3)) {
                 ret_val=1;
             } else ret_val=0;
 
-            if (num>5) {
+            if (num>12) {
                 kill(mpid,SIGKILL);
                 unlink(FIFO_NAME);
                 break;
