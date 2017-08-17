@@ -80,6 +80,8 @@ dlna_updown()
             echo "dlna stop:network disconnected..."
             kill_task $PROCESS
             flag=0
+          else
+            sleep 3
           fi
         fi
     done
