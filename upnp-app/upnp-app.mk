@@ -19,8 +19,8 @@ define UPNP_APP_BUILD_CMDS
 	build_config=Debug gcctool=$(TARGET_CC)
 endef
 
-define DEMO_APP_INSTALL_TARGET_CMDS
-	$(INSTALL) -m 0755 -D $(@D)/$(OUT_BIN)	$(TARGET_DIR)/usr/bin
+define UPNP_APP_INSTALL_TARGET_CMDS
+    $(INSTALL) -m 0755 -D $(TOPDIR)/../vendor/amlogic/external/platinum/upnp-app/S79dlna-sync $(TARGET_DIR)/etc/init.d
 endef
 
 define UPNP_APP_CLEAN_CMDS
