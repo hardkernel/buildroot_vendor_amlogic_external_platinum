@@ -9,7 +9,7 @@ UPNP_APP_SITE=$(TOPDIR)/../vendor/amlogic/external/platinum/upnp-app/src
 UPNP_APP_SITE_METHOD=local
 UPNP_APP_BUILD_DIR = $(BUILD_DIR)
 UPNP_APP_INSTALL_STAGING = YES
-UPNP_APP_DEPENDENCIES = gstreamer1 host-pkgconf libplayer host-scons
+UPNP_APP_DEPENDENCIES = gstreamer1 host-pkgconf host-scons
 CFLAGS = -W1,-fPIC
 CURRENT_DIR = $(UPNP_APP_BUILD_DIR)/$(appName)-$(UPNP_APP_VERSION)/
 
